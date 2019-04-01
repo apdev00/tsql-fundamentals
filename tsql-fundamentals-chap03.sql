@@ -40,7 +40,7 @@ ORDER BY n;
 --------------------------------------------------------------------------------------------------------------
 -- Exercises
 --------------------------------------------------------------------------------------------------------------
--- 1.
+-- 1-1.
 SELECT TOP 10 * FROM dbo.Nums
 
 SELECT 
@@ -52,7 +52,7 @@ WHERE
 	n.n <= 5
 
 
--- 2.
+-- 1-2.
 SELECT n.n, DATEADD(DAY, (n.n - 1), '20160612') dt
 FROM dbo.Nums n
 WHERE n.n <= 5;
@@ -69,3 +69,28 @@ ORDER BY
 
 
 -- 3.
+SELECT * FROM Sales.Customers;
+SELECT * FROM Sales.Orders WHERE custid = 32
+SELECT * FROM Sales.OrderDetails WHERE orderid IN (SELECT orderid FROM Sales.Orders WHERE custid = 32)
+
+SELECT
+	c.custid, COUNT(b.orderid) numorders, SUM(b.qty) totalqty
+FROM
+	Sales.Customers c
+		LEFT OUTER JOIN (	SELECT o.orderid, o.custid, od.qty
+							FROM SAles.Orders o
+								INNER JOIN Sales.OrderDetails od
+									ON o.orderid = od.orderid) b
+			ON c.custid = b.custid
+WHERE
+	c.country = 'USA'
+GROUP BY
+	c.custid
+ORDER BY
+	c.custid;
+
+SELECT o.orderid, o.custid, od.qty
+FROM SAles.Orders o
+	INNER JOIN Sales.OrderDetails od
+		ON o.orderid = od.orderid
+WHERE o.custid = 32

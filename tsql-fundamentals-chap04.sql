@@ -88,3 +88,94 @@ WHERE shipper_id IN (SELECT s.shipper_id FROM Sales.Orders s WHERE s.custid = 43
 --------------------------------------------------------------------------------------------------------------
 -- 1.
 SELECT * FROM Sales.Orders;
+
+SELECT o1.orderid, o1.orderdate, o1.custid, o1.empid
+FROM Sales.Orders o1
+WHERE o1.orderdate = (SELECT MAX(orderdate) FROM Sales.Orders)
+
+-- 2.
+SELECT custid, orderid, orderdate, empid
+FROM Sales.Orders
+WHERE custid IN (
+	SELECT TOP 1 WITH TIES custid
+	FROM Sales.Orders
+	GROUP BY custid
+	ORDER BY COUNT(*) DESC)
+
+-- 3.
+SELECT TOP 10 * FROM Sales.Orders;
+SELECT TOP 10 * FROM HR.Employees;
+
+SELECT empid, firstname,lastname
+FROM HR.Employees
+WHERE empid NOT IN (
+	SELECT empid
+	FROM Sales.Orders
+	WHERE orderdate >= '20160501')
+
+-- 4.
+SELECT TOP 10 * FROM Sales.Customers;
+SELECT TOP 10 * FROM HR.Employees;
+
+SELECT DISTINCT country
+FROM Sales.Customers
+WHERE country NOT IN (
+	SELECT country
+	FROM HR.Employees
+	WHERE country IS NOT NULL)
+
+-- 5.
+SELECT TOP 10 * FROM Sales.Orders;
+
+SELECT o1.custid, o1.orderid, o1.orderdate, o1.empid
+FROM Sales.Orders o1
+WHERE o1.orderdate = (
+	SELECT MAX(o2.orderdate)
+	FROM Sales.Orders o2
+	WHERE o2.custid = o1.custid)
+ORDER BY o1.custid;
+
+-- 6.
+SELECT custid, companyname
+FROM Sales.Customers
+WHERE custid IN (
+	SELECT custid
+	FROM Sales.Orders
+	WHERE YEAR(orderdate) = 2015)
+  AND custid NOT IN (
+		SELECT custid
+	FROM Sales.Orders
+	WHERE YEAR(orderdate) = 2016);
+
+-- 7.
+SELECT TOP 10 * FROM Sales.OrderDetails;
+
+SELECT DISTINCT c.custid, c.companyname
+FROM Sales.Customers c
+	INNER JOIN Sales.Orders o
+		ON c.custid = o.custid
+	INNER JOIN Sales.OrderDetails od
+		ON o.orderid = od.orderid
+WHERE od.productid = 12;
+
+-- 8.
+SELECT TOP 10 * FROM Sales.CustOrders;
+
+SELECT o1.custid, o1.ordermonth, o1.qty,
+	(SELECT SUM(o2.qty)
+	 FROM Sales.CustOrders o2
+	 WHERE o2.ordermonth <= o1.ordermonth
+	   AND o2.custid = o1.custid) 'runqty'
+FROM Sales.CustOrders o1
+ORDER BY o1.custid, o1.ordermonth
+
+-- 10.
+SELECT TOP 10 * FROM Sales.Orders;
+
+SELECT o1.custid, o1.orderdate, o1.orderid, 
+	(SELECT MAX(o2.orderdate)
+	 FROM Sales.Orders o2
+	 WHERE o2.custid = o1.custid
+	   AND o2.orderdate <= o1.orderdate
+	   AND o2.orderid < o1.orderid)
+FROM Sales.Orders o1

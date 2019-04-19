@@ -101,7 +101,7 @@ FROM Sales.Customers c
 --------------------------------------------------------------------------------------------------------------
 -- Exercises Chap 05
 --------------------------------------------------------------------------------------------------------------
---2.1
+-- 2.1
 SELECT TOP 10 * FROM Sales.Orders;
 
 SELECT empid, MAX(orderdate) maxorderdate
@@ -118,4 +118,19 @@ FROM Sales.Orders o
 		AND o.empid = a.empid
 ORDER BY o.empid DESC, o.orderid DESC;
 
--- test change #2 into branch
+
+-- 3.1
+SELECT TOP 10 * FROM Sales.Orders;
+
+SELECT orderid, orderdate, custid, empid, 
+	ROW_NUMBER() OVER (ORDER BY orderdate, orderid) rownum
+FROM Sales.Orders;
+
+WITH CTE_orders
+AS
+(
+	SELECT orderid, orderdate, custid, empid, 
+		ROW_NUMBER() OVER (ORDER BY orderdate, orderid) rownum
+	FROM Sales.Orders
+)
+SELECT * FROM CTE_orders WHERE rownum BETWEEN 11 AND 20;
